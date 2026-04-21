@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playsculpt - Portal</title>
+    
+    <style>
+        /* Classic Early 2000s Web Layout */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #002244;
+            color: #ffffff;
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .site-header {
+            background-color: #001122;
+            border-bottom: 4px solid #ffaa00;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .site-header h1 {
+            margin: 0;
+            font-family: "Arial Black", Impact, sans-serif;
+            font-size: 48px;
+            color: #ffaa00;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 3px 3px 0 #000000;
+        }
+
+        .server-status {
+            font-size: 14px;
+            font-weight: bold;
+            background: #000;
+            padding: 10px;
+            border: 2px inset #555;
+            min-width: 200px;
+        }
+
+        .status-online { color: #00ff00; }
+        .status-offline { color: #ff0000; }
+
+        .page-content {
+            display: flex;
+            flex: 1;
+            width: 100%;
+        }
+
+        .left-column {
+            width: 30%;
+            background-color: #003366;
+            border-right: 4px double #ffaa00;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .right-column {
+            width: 70%;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+            background-image: repeating-linear-gradient(
+                45deg,
+                #002244,
+                #002244 10px,
+                #00264d 10px,
+                #00264d 20px
+            );
+        }
+
+        h2 {
+            font-family: "Arial Black", sans-serif;
+            color: #ffffff;
+            border-bottom: 2px solid #555;
+            padding-bottom: 5px;
+            margin-top: 0;
+        }
+
+        .news-item {
+            background-color: #001122;
+            border: 1px solid #555;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .auth-container {
+            display: flex;
+            gap: 20px;
+            height: 100%;
+        }
+
+        .auth-box {
+            flex: 1;
+            background-color: #003366;
+            border: 2px outset #555;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        fieldset {
+            border: 2px solid #ffaa00;
+            padding: 20px;
+            margin-bottom: 20px;
+            flex: 1;
+        }
+
+        legend {
+            color: #ffaa00;
+            font-weight: bold;
+            font-size: 18px;
+            background: #002244;
+            padding: 0 10px;
+            border: 1px solid #ffaa00;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #cccccc;
+            font-size: 14px;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            background-color: #ffffff;
+            color: #000000;
+            border: 3px inset #cccccc;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .btn {
+            background-color: #ffaa00;
+            color: #000000;
+            font-family: "Arial Black", sans-serif;
+            font-size: 18px;
+            padding: 15px;
+            border: 4px outset #ffcc66;
+            cursor: pointer;
+            width: 100%;
+            text-transform: uppercase;
+        }
+
+        .btn:active {
+            border-style: inset;
+            background-color: #e69900;
+        }
+
+        .message-box {
+            margin-top: 20px;
+            padding: 15px;
+            font-weight: bold;
+            border: 2px solid;
+            display: none;
+        }
+
+        .error { background-color: #440000; border-color: #ff0000; color: #ffaaaa; display: block; }
+        .success { background-color: #004400; border-color: #00ff00; color: #aaffaa; display: block; }
+
+        .site-footer {
+            background-color: #001122;
+            border-top: 4px solid #ffaa00;
+            text-align: center;
+            padding: 15px;
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="site-header">
+        <h1>Playsculpt</h1>
+        <div class="server-status" id="serverInfo">
+            SERVER STATUS: PINGING...<br>
+            PLAYERS ONLINE: ---
+        </div>
+    </header>
+
+    <div class="page-content">
+        <div class="left-column">
+            <h2>LATEST NEWS</h2>
+            <div class="news-item">
+                News articles coming soon...
+            </div>
+            
+            <div id="global-message" class="message-box"></div>
+        </div>
+
+        <div class="right-column">
+            <div class="auth-container">
+                <div class="auth-box">
+                    <form id="loginForm" style="height: 100%; display: flex; flex-direction: column;">
+                        <fieldset>
+                            <legend>EXISTING USER LOGIN</legend>
+                            <label for="loginUser">ACCOUNT NAME:</label>
+                            <input type="text" id="loginUser" required>
+                            <label for="loginPass">PASSWORD:</label>
+                            <input type="password" id="loginPass" required>
+                        </fieldset>
+                        <button type="submit" class="btn">LOGIN & PLAY</button>
+                    </form>
+                </div>
+
+                <div class="auth-box">
+                    <form id="signupForm" style="height: 100%; display: flex; flex-direction: column;">
+                        <fieldset>
+                            <legend>NEW PLAYER REGISTRATION</legend>
+                            <label for="signupUser">CHOOSE ACCOUNT NAME:</label>
+                            <input type="text" id="signupUser" required>
+                            <label for="signupPass">CHOOSE PASSWORD:</label>
+                            <input type="password" id="signupPass" required>
+                        </fieldset>
+                        <button type="submit" class="btn">CREATE ACCOUNT</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        &copy; Playsculpt Entertainment Systems. All Rights Reserved.
+    </footer>
+
+<script>
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        const messageBox = document.getElementById('global-message');
+        const serverInfo = document.getElementById('serverInfo');
+
+        let currentUser = null; // Tracks who is currently logged in
+
+        // --- SERVER STATUS & HEARTBEAT LOGIC ---
+        async function fetchServerStatus() {
+            try {
+                const response = await fetch('/api/status');
+                if (response.ok) {
+                    const data = await response.json();
+                    serverInfo.innerHTML = `SERVER STATUS: <span class="status-online">${data.status}</span><br>PLAYERS ONLINE: ${data.players}`;
+                } else {
+                    throw new Error('Server returned bad response');
+                }
+            } catch (err) {
+                serverInfo.innerHTML = `SERVER STATUS: <span class="status-offline">OFFLINE</span><br>PLAYERS ONLINE: 0`;
+            }
+        }
+
+        // Send a heartbeat to the server if logged in
+        async function sendHeartbeat() {
+            if (currentUser) {
+                try {
+                    await fetch('/api/heartbeat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username: currentUser })
+                    });
+                } catch (err) {
+                    console.error("Heartbeat failed.");
+                }
+            }
+        }
+
+        // Fetch status immediately
+        fetchServerStatus();
+        
+        // Every 10 seconds: fetch the latest count AND send a heartbeat if logged in
+        setInterval(() => {
+            fetchServerStatus();
+            sendHeartbeat();
+        }, 10000);
+
+
+        // --- AUTHENTICATION LOGIC ---
+        function showMessage(msg, isError) {
+            messageBox.innerText = msg;
+            messageBox.className = 'message-box ' + (isError ? 'error' : 'success');
+        }
+
+        async function handleAuth(url, username, password) {
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    showMessage(data.error, true);
+                } else {
+                    showMessage(data.message, false);
+                    if (url === '/api/signup') {
+                        signupForm.reset();
+                        showMessage("ACCOUNT CREATED! PLEASE LOGIN ON THE LEFT.", false);
+                    } else {
+                        // SUCCESSFUL LOGIN!
+                        currentUser = username; // Set the current user for the heartbeat
+                        showMessage(`WELCOME ${username.toUpperCase()}! INITIATING CLIENT...`, false);
+                        
+                        // Send an immediate heartbeat so they show up on the counter instantly
+                        sendHeartbeat();
+                        setTimeout(fetchServerStatus, 500); // Fetch new count quickly so they see the number jump
+                    }
+                }
+            } catch (err) {
+                showMessage('ERROR: COULD NOT CONNECT TO LOGIN SERVER.', true);
+            }
+        }
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const user = document.getElementById('loginUser').value;
+            const pass = document.getElementById('loginPass').value;
+            handleAuth('/api/login', user, pass);
+        });
+
+        signupForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const user = document.getElementById('signupUser').value;
+            const pass = document.getElementById('signupPass').value;
+            handleAuth('/api/signup', user, pass);
+        });
+    </script>
+</body>
+</html>
