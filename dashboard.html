@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playsculpt - Dashboard</title>
+    <style>
+        /* Shared Styles from Auth Page */
+        body {
+            margin: 0; padding: 0;
+            background-color: #002244; color: #ffffff;
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            display: flex; flex-direction: column; min-height: 100vh;
+        }
+
+        .site-header {
+            background-color: #001122; border-bottom: 4px solid #ffaa00;
+            padding: 20px; display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .site-header h1 {
+            margin: 0; font-family: "Arial Black", Impact, sans-serif;
+            font-size: 48px; color: #ffaa00; text-transform: uppercase;
+            letter-spacing: 2px; text-shadow: 3px 3px 0 #000000;
+        }
+
+        .server-status {
+            font-size: 14px; font-weight: bold; background: #000;
+            padding: 10px; border: 2px inset #555; min-width: 200px;
+        }
+        .status-online { color: #00ff00; }
+        .status-offline { color: #ff0000; }
+
+        /* Dashboard Specific Layout */
+        .page-content {
+            display: flex; flex: 1; width: 100%;
+        }
+
+        .sidebar {
+            width: 25%; background-color: #003366;
+            border-right: 4px double #ffaa00; padding: 20px; box-sizing: border-box;
+        }
+
+        .main-terminal {
+            width: 75%; padding: 40px; box-sizing: border-box;
+            background-image: repeating-linear-gradient(45deg, #002244, #002244 10px, #00264d 10px, #00264d 20px);
+        }
+        
+        .currency-box {
+            background-color: #001122; border: 1px solid #ffaa00; padding: 15px; margin-bottom: 15px; font-size: 14px; font-weight: bold;
+        }
+        .currency-row { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px dashed #555; padding-bottom: 5px; }
+        .currency-row:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
+        
+        .c-sculpt { color: #aaaaaa; } /* Silver */
+        .c-diamond { color: #00ffff; } /* Cyan */
+        .c-token { color: #ffaa00; } /* Gold */
+
+        fieldset { border: 2px solid #ffaa00; padding: 30px; background-color: #003366; }
+        legend { color: #ffaa00; font-weight: bold; font-size: 18px; background: #002244; padding: 0 10px; border: 1px solid #ffaa00; }
+
+        .welcome-msg { font-size: 24px; font-family: "Courier New", Courier, monospace; font-weight: bold; margin-bottom: 20px; color: #00ff00; }
+        .rare-msg { color: #ff00ff; animation: blinker 1s linear infinite; } /* Magenta for the rare message! */
+        @keyframes blinker { 50% { opacity: 0; } }
+
+        .btn-logout { background-color: #555; border: 2px outset #777; color: #fff; margin-top: 10px; font-size: 14px; padding: 10px; font-weight: bold; width: 100%; cursor: pointer; }
+        .btn-logout:active { border-style: inset; background-color: #444; }
+
+        .site-footer { background-color: #001122; border-top: 4px solid #ffaa00; text-align: center; padding: 15px; font-size: 12px; color: #888; }
+    </style>
+</head>
+<body>
+
+    <header class="site-header">
+        <h1>Playsculpt</h1>
+        <div class="server-status" id="serverInfo">
+            SERVER STATUS: PINGING...<br>
+            PLAYERS ONLINE: ---
+        </div>
+    </header>
+
+    <div class="page-content">
+        <div class="sidebar">
+            <div class="currency-box">
+                <div class="currency-row">
+                    <span>SculptCoins:</span>
+                    <span class="c-sculpt" id="val-sculpt">--</span>
+                </div>
+                <div class="currency-row">
+                    <span>Diamonds:</span>
+                    <span class="c-diamond" id="val-diamonds">--</span>
+                </div>
+                <div class="currency-row">
+                    <span>Tokens:</span>
+                    <span class="c-token" id="val-tokens">--</span>
+                </div>
+            </div>
+
+            <button class="btn-logout" onclick="logout()">LOGOUT</button>
+        </div>
+
+        <div class="main-terminal">
+            <fieldset>
+                <legend>PLAYSCULPT DASHBOARD</legend>
+                <div id="welcomeText" class="welcome-msg">LOADING...</div>
+                <p>Welcome to the main server hub. From here you can manage your inventory or trade currencies.</p>
+            </fieldset>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        &copy; Playsculpt Entertainment Systems. All Rights Reserved.
+    </footer>
+
+    <script>
+        const currentUser = localStorage.getItem('currentUser');
+        const serverInfo = document.getElementById('serverInfo');
+        const welcomeText = document.getElementById('welcomeText');
+
+        // Security check: If they aren't logged in, kick them back to auth.html
+        if (!currentUser) {
+            window.location.href = '/';
+        }
+
+        // --- SERVER HEARTBEAT & COUNT ---
+        async function fetchServerStatus() {
+            try {
+                const response = await fetch('/api/status');
+                if (response.ok) {
+                    const data = await response.json();
+                    serverInfo.innerHTML = `SERVER STATUS: <span class="status-online">${data.status}</span><br>PLAYERS ONLINE: ${data.players}`;
+                }
+            } catch (err) {
+                serverInfo.innerHTML = `SERVER STATUS: <span class="status-offline">OFFLINE</span><br>PLAYERS ONLINE: 0`;
+            }
+        }
+
+        async function sendHeartbeat() {
+            fetch('/api/heartbeat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: currentUser })
+            });
+        }
+
+        // Initialize heartbeat immediately
+        sendHeartbeat();
+        fetchServerStatus();
+        setInterval(() => {
+            fetchServerStatus();
+            sendHeartbeat();
+        }, 10000);
+
+        // --- FETCH CURRENCIES ---
+        async function loadUserData() {
+            const res = await fetch('/api/userdata', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: currentUser })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                // The '|| 0' ensures old accounts show 0 instead of 'undefined'
+                document.getElementById('val-sculpt').innerText = data.sculptCoins || 0;
+                document.getElementById('val-diamonds').innerText = data.diamonds || 0;
+                document.getElementById('val-tokens').innerText = data.tokens || 0;
+            }
+        }
+
+        // --- WELCOME MESSAGE LOGIC ---
+        const normalMessages = [
+            "Welcome back,", "Ready to build,", "Good to see you,", "Greetings,", 
+            "Let's get sculpting,", "Hello there,", "Welcome to Playsculpt,", 
+            "Logging in successful,", "Have a blast,", "Have a great time", 
+            "Have fun", "Happy building,", "Entering the portal,", 
+            "Welcome home,", "Your tools are ready,", "Let the games begin,", "Player recognized:"
+        ];
+
+        async function generateWelcome() {
+            // 4% chance for the rare message (0.00 to 0.039)
+            const roll = Math.random();
+            
+            if (roll < 0.04) {
+                welcomeText.innerHTML = `<span class="rare-msg">zOMG HI, ${currentUser.toUpperCase()}! (+5 DIAMONDS!)</span>`;
+                // Hit the backend to award the diamonds!
+                const res = await fetch('/api/award-diamonds', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: currentUser, amount: 5 })
+                });
+                // Reload the currencies so the new 5 diamonds show up on the left immediately
+                if (res.ok) loadUserData(); 
+            } else {
+                // Normal message
+                const randomMsg = normalMessages[Math.floor(Math.random() * normalMessages.length)];
+                welcomeText.innerText = `${randomMsg.toUpperCase()} ${currentUser.toUpperCase()}`;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = '/';
+        }
+
+        // Run on page load
+        loadUserData();
+        generateWelcome();
+    </script>
+</body>
+</html>
